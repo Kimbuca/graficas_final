@@ -11,6 +11,7 @@ var Bush = function (){
 
 	base.castShadow = true;
 	base.receiveShadow = true;
+	this.name = "Bush";
 	this.add(base);
 }
 

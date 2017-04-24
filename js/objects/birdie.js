@@ -9,7 +9,6 @@ var Birdie = function (){
 			metalness: 0})
 	);
 
-
 	body.rotateZ(Math.PI * .5);
 	body.castShadow = true;
 	body.receiveShadow = true;
@@ -32,5 +31,22 @@ var Birdie = function (){
 	this.add(peak);
 }
 
+
 Birdie.prototype = Object.create(THREE.Group.prototype);
 Birdie.prototype.constructor = Birdie;
+
+
+Birdie.prototype.open = 0;
+Birdie.prototype.angle = 0;
+Birdie.prototype.RADIUS = 18;
+
+
+Birdie.prototype.fly = function(){
+
+	this.position.x = Math.cos(this.angle) * this.RADIUS;
+  	this.position.y = 12 + Math.sin(this.open) * 4; //up and down
+ 	this.position.z = Math.sin(this.angle) * this.RADIUS;
+ 
+	this.open += .085;
+	this.angle += .025;
+}
