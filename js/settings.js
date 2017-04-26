@@ -1,8 +1,10 @@
 var params = {
 
-	bushNumber: 10,
-	bushRadius: 30,
-	checkTree: true
+	color: "#4dba6d",
+	checkTree: true,
+	treeWidth: 10,
+	treeHeight: 1,
+	leafColor: 10,
 }
 
 var ControlPanel = function (){
@@ -11,18 +13,37 @@ var ControlPanel = function (){
    		height : 10
 	});
 
-	Gui.add(params, 'bushNumber').min(1).max(10).step(1)
-	.name('Arbustos')
-	.onFinishChange(function(){
-		setBushNum(params.bushNumber);
-		console.log("Cambiaste! ", numBush);
+	Gui.add(params, 'checkTree')
+	.name('Arbol Default')
+	.listen()
+	.onFinishChange(function(checked){
+		if(!checked){
+			deleteBirdAndTree();
+		}else{
+			createBirdAndTree();
+		}
 	})
 
-	Gui.add(params, 'bushRadius').min(10).max(30).step(.5)
-	.name('Radio')
+	Gui.addColor(params, 'color')
+	.name('Color Hojas')
+	.onChange(function() {
+		hexColor = params.color;
+		changeTreeColor(params.color);
+	})
+
+
+	Gui.add(params, 'treeWidth').min(1).max(20).step(1)
+	.name('Ancho Arbol')
+	.onFinishChange(function(){
+		setTreeWidth(params.treeWidth * .1);
+		console.log("Cambiaste! ", params.treeWidth);
+	})
+
+	Gui.add(params, 'treeHeight').min(.1).max(2).step(.1)
+	.name('Alto Arbol')
 	.onChange(function(){
-		setBushRadius(params.bushRadius);
-		console.log("Cambiaste! ", params.bushRadius);
+		setTreeHeight(params.treeHeight);
+		console.log("Cambiaste! ", params.treeWidth);
 	})
 
 	return Gui;

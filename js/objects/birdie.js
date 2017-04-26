@@ -44,9 +44,10 @@ Birdie.prototype.RADIUS = 18;
 Birdie.prototype.fly = function(){
 
 	this.position.x = Math.cos(this.angle) * this.RADIUS;
-  	this.position.y = 12 + Math.sin(this.open) * 4; //up and down
+  	this.position.y = 12; //up and down
  	this.position.z = Math.sin(this.angle) * this.RADIUS;
- 
+ 	
+ 	this.rotateY(-0.05);
 	this.open += .085;
 	this.angle += .025;
 }
