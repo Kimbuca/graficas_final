@@ -1,12 +1,12 @@
 let renderer, scene, camera, cRenderer;
 let bird;
 
-let BushNum = 15;
+let BushNum = 25;
 let bushArrange = [];
 
 let setOfParticles = [];
 
-let particleCount = 300;
+let particleCount = 500;
 let particles; //cube asdefault
 let pMaterial;
 let particleSystem;
@@ -14,17 +14,18 @@ let particleSystem;
 let exploding = false;
 let explodingTimer = 0;
 
-let hexColor = '4dba6d';
+let hexColor = '4dba6d'; //tree top default color
 
 let tree;
+let terrainDimension = 500;
 
 function init(){
 	scene = new THREE.Scene();
 	initRenderer();
 	initLight();
 
-	setBushRandomly(BushNum, 240, 240);
 	initTerrain();
+	setBushRandomly(BushNum, terrainDimension-50, terrainDimension-50);
 	createBirdAndTree();
 
 	//Add Mouse Listener
@@ -38,9 +39,12 @@ function initRenderer() {
 	renderer = new THREE.WebGLRenderer({antialias:true});
 	camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.5, 10000 );
 	
-	camera.position.set(0,135,250);
+	camera.position.set(0,175,300);
 
 	controls = new THREE.OrbitControls(camera, renderer.domElement);
+	controls.minPolarAngle = -15;
+	controls.maxPolarAngle = Math.PI / 2;
+
 	// Configure renderer clear color
 	renderer.setClearColor(0x43304c);
 	// Configure renderer size
@@ -54,30 +58,36 @@ function initLight() {
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-	let ambientLight = new THREE.AmbientLight( 0xffffff, 0.2 );
+	let ambientLight = new THREE.AmbientLight( 0xffffff, 0.3 );
 	scene.add( ambientLight );
 
 	let pointLight = new THREE.PointLight( 0xffffff, 1 );
-	pointLight.position.set( 25, 50, 25 );
+	pointLight.position.set( 150, 100, 150);
 	scene.add( pointLight );
 
-	/*
 	pointLight.castShadow = true;
 	pointLight.shadow.mapSize.width = 1024;
-	pointLight.shadow.mapSize.height = 1024;*/
+	pointLight.shadow.mapSize.height = 1024;
 
 	let shadowMaterial = new THREE.ShadowMaterial( { color: 0xeeeeee } );
 	shadowMaterial.opacity = 0.5;
 }
 
 function initTerrain() {
+
+	let floorTexture = new THREE.TextureLoader().load("img/grass.jpg");
+	floorTexture.wrapS = THREE.RepeatWrapping;
+	floorTexture.wrapT = THREE.RepeatWrapping;
+	floorTexture.repeat.set( 5, 5 );
+
 	let terrain = new THREE.Mesh(
-	new THREE.PlaneGeometry(250,250,35),
-	new THREE.MeshStandardMaterial({
-			color: 0x4dba6d, 
-			metalness: 0})
+	new THREE.PlaneGeometry(terrainDimension,terrainDimension,40),
+	new THREE.MeshBasicMaterial({
+			map: floorTexture,
+			 shading: THREE.FlatShading,
+    		})
 	);
-	
+
 	terrain.name = "terrain";
 	terrain.receiveShadow = true;
 	terrain.position.y = 0;
@@ -88,11 +98,10 @@ function initTerrain() {
 }
 
 
-function createTree(x, y, z){
 
+function createTree(x, y, z){
 	var newTree = tree.clone();
-	console.log("ABOL", tree);
-	
+	console.log(hexColor);
 	newTree.children[1].material.color.setHex("0x"+hexColor);
 
 	scene.add(newTree);
@@ -100,16 +109,19 @@ function createTree(x, y, z){
 
 }
 
+//global function to change on scene tree color
 function changeTreeColor(c){
 	tree.setColor(c);
 }
 
 
+// Instanciate a bunch of particles
 function createParticlesFor(obj){
+
 	THREE.ImageUtils.crossOrigin = "";
 	particles = new THREE.Geometry(); //cube as default
 
-	let texture = new THREE.TextureLoader().load("ps_ball.png");
+	let texture = new THREE.TextureLoader().load("img/ps_ball.png");
 	texture.wrapS = THREE.RepeatWrapping;
 	texture.wrapT = THREE.RepeatWrapping;
 	texture.repeat.set( 1, 1 );
@@ -126,9 +138,9 @@ function createParticlesFor(obj){
 	for(let i=0; i<particleCount;i++){
 		
 		let particle = new THREE.Vector3(
-	        (obj.position.x-125)+Math.random()*4, 
-	        obj.position.y+Math.random()*4,
-	        (obj.position.z-125)+Math.random()*4
+	        (obj.position.x-  ((terrainDimension-50)/2))+Math.random()*4, 
+	         obj.position.y+Math.random()*4,
+	        (obj.position.z- ((terrainDimension-50)/2))+Math.random()*4
 	    );
     	particles.vertices.push(particle);
 	}
@@ -147,9 +159,11 @@ function createParticlesFor(obj){
 
 }
 
+
+//explosion effect for particles
 function particlesExplode() {
 
-	let velocity = 0.1;
+	let velocity = 0.2;
 	let angle = Math.PI*2/particles.vertices.length;
 	let zdirection = 1;
 
@@ -189,49 +203,45 @@ function OnMouseDown(event) {
 
 	if(intersects.length > 0){
 		let object = intersects[0].object;
-		if(object.name == 'terrain'){
 
-			console.log("LE PEGASTE AL TERRENO");
+		if(object.name == 'terrain'){
 			let terrainPortion = intersects[0].point;
-			console.log(terrainPortion);
 			createTree(terrainPortion.x, terrainPortion.y, terrainPortion.z);
 		}else{
-
-			console.log(object);
 			let selectedObject = scene.getObjectByName('groupRocks');
-			console.log(selectedObject);
-
 			createParticlesFor(object);
 			selectedObject.remove(object);
 		}	
 	}
 }
 
+
 var deleteBirdAndTree = function () {
 	deleteEntityFromScene('BirdAndTree');
 	bird = undefined;
 }
 
+//creates couple of bird and tree
 var createBirdAndTree = function () {
 	let group = new THREE.Object3D();
 	tree = new Tree();
 	bird = new Birdie();
 
 	bird.scale.set(.18,.18,.18);
-	bird.position.z  = 18;
-	bird.position.y -= 50;
+	bird.position.z  = 80;
+	bird.position.y -= 100;
 
 	group.add(bird);
 	group.add(tree);
 	group.name = 'BirdAndTree';
 
 	scene.add(group);
-	console.log(scene.children);
 }
 
 
 var setTreeWidth = function(scale) {
 	tree.scale.set(1*scale, 1, 1*scale);
+
 }
 
 var setTreeHeight = function(scale) {

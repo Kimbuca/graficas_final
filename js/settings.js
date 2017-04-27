@@ -20,6 +20,7 @@ var ControlPanel = function (){
 		if(!checked){
 			deleteBirdAndTree();
 		}else{
+			hexColor = '4dba6d';
 			createBirdAndTree();
 		}
 	})
@@ -31,19 +32,18 @@ var ControlPanel = function (){
 		changeTreeColor(params.color);
 	})
 
-
 	Gui.add(params, 'treeWidth').min(1).max(20).step(1)
 	.name('Ancho Arbol')
 	.onFinishChange(function(){
 		setTreeWidth(params.treeWidth * .1);
-		console.log("Cambiaste! ", params.treeWidth);
+		console.log("Cambiaste Alto! ", params.treeWidth);
 	})
 
 	Gui.add(params, 'treeHeight').min(.1).max(2).step(.1)
 	.name('Alto Arbol')
 	.onChange(function(){
 		setTreeHeight(params.treeHeight);
-		console.log("Cambiaste! ", params.treeWidth);
+		console.log("Cambiaste Ancho! ", params.treeHeight);
 	})
 
 	return Gui;
